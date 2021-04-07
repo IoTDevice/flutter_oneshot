@@ -24,7 +24,7 @@ public class FlutterOneshotPlugin implements FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private int timeout = 60;//miao
-  private Activity activity;
+  private FlutterPluginBinding flutterPluginBinding;
   private MethodChannel channel;
 
   private String ssid;
@@ -32,15 +32,15 @@ public class FlutterOneshotPlugin implements FlutterPlugin, MethodCallHandler {
   private IOneShotConfig oneshotConfig = null;
   private SmartConfigFactory factory = null;
 
-  public FlutterOneshotPlugin(Activity activity,MethodChannel channel) {
-    this.activity = activity;
+  public FlutterOneshotPlugin(FlutterPluginBinding flutterPluginBinding,MethodChannel channel) {
+    this.flutterPluginBinding = flutterPluginBinding;
     this.channel = channel;
   }
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "flutter_oneshot");
-    channel.setMethodCallHandler(this);
+    channel.setMethodCallHandler(new FlutterOneshotPlugin(flutterPluginBinding,channel));
   }
 
   @Override
@@ -82,7 +82,7 @@ public class FlutterOneshotPlugin implements FlutterPlugin, MethodCallHandler {
       oneshotConfig = factory.createOneShotConfig(ConfigType.UDP);
       //      start config
       try {
-        oneshotConfig.start(ssid, password, timeout, activity.getApplicationContext());
+        oneshotConfig.start(ssid, password, timeout, flutterPluginBinding.getApplicationContext());
       }
       catch (OneShotException e) {
         Log.d("===oneshot-OneShotE===",e.getMessage());
@@ -97,12 +97,7 @@ public class FlutterOneshotPlugin implements FlutterPlugin, MethodCallHandler {
         oneshotConfig.stop(	);
         ret.put("result","success");
         Log.d("===oneshot-success===","success");
-        activity.runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            result.success(ret);
-          }
-        });
+        result.success(ret);
       }
     }
   }
