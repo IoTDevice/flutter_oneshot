@@ -24,7 +24,7 @@ public class FlutterOneshotPlugin implements FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private int timeout = 60;//miao
-  private FlutterPluginBinding flutterPluginBinding;
+  private FlutterPluginBinding myFlutterPluginBinding;
   private MethodChannel channel;
 
   private String ssid;
@@ -32,15 +32,11 @@ public class FlutterOneshotPlugin implements FlutterPlugin, MethodCallHandler {
   private IOneShotConfig oneshotConfig = null;
   private SmartConfigFactory factory = null;
 
-  public FlutterOneshotPlugin(FlutterPluginBinding flutterPluginBinding,MethodChannel channel) {
-    this.flutterPluginBinding = flutterPluginBinding;
-    this.channel = channel;
-  }
-
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+    myFlutterPluginBinding = flutterPluginBinding;
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "flutter_oneshot");
-    channel.setMethodCallHandler(new FlutterOneshotPlugin(flutterPluginBinding,channel));
+    channel.setMethodCallHandler(this);
   }
 
   @Override
@@ -82,7 +78,7 @@ public class FlutterOneshotPlugin implements FlutterPlugin, MethodCallHandler {
       oneshotConfig = factory.createOneShotConfig(ConfigType.UDP);
       //      start config
       try {
-        oneshotConfig.start(ssid, password, timeout, flutterPluginBinding.getApplicationContext());
+        oneshotConfig.start(ssid, password, timeout, myFlutterPluginBinding.getApplicationContext());
       }
       catch (OneShotException e) {
         Log.d("===oneshot-OneShotE===",e.getMessage());

@@ -1,6 +1,6 @@
 name: flutter_oneshot
 description: OneShot for w60x wifi config
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/iotdevice/flutter_oneshot
 
 environment:
